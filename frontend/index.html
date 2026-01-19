@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MoodCrowd</title>
+  <!-- Подключаем Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    .file-drop {
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .file-drop:hover {
+      background: #f8fafc;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen p-6">
+
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold text-center mb-6 text-indigo-700">MoodCrowd</h1>
+
+    <!-- Область загрузки -->
+    <div id="upload-section" class="bg-white p-6 rounded-xl shadow mb-8">
+      <h2 class="text-xl font-semibold mb-4">Загрузите до 10 MP3-файлов</h2>
+      <div class="file-drop" id="drop-area">
+        <p class="text-gray-600 mb-2">Перетащите файлы сюда или нажмите</p>
+        <input type="file" id="file-input" multiple accept=".mp3" class="hidden" />
+        <button type="button" id="browse-btn" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
+          Выбрать файлы
+        </button>
+      </div>
+      <p id="file-count" class="mt-2 text-sm text-gray-500">Выбрано: 0 файлов</p>
+      <button id="analyze-btn" disabled class="mt-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50">
+        Анализировать
+      </button>
+    </div>
+
+    <!-- Результаты -->
+    <div id="results-section" class="hidden">
+      <h2 class="text-2xl font-bold mb-4">Анализ плейлиста</h2>
+
+      <!-- Таблица -->
+      <div class="bg-white p-4 rounded-xl shadow mb-6 overflow-x-auto">
+        <table class="min-w-full">
+          <thead>
+            <tr class="bg-gray-100">
+              <th class="p-2 text-left">Название</th>
+              <th class="p-2 text-left">Артист</th>
+              <th class="p-2 text-left">Жанр</th>
+              <th class="p-2 text-left">BPM</th>
+            </tr>
+          </thead>
+          <tbody id="tracks-table">
+            <!-- Сюда подставятся строки -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- График -->
+      <div class="bg-white p-4 rounded-xl shadow mb-6">
+        <h3 class="font-medium mb-2">График BPM</h3>
+        <canvas id="bpm-chart" height="100"></canvas>
+      </div>
+
+      <!-- Кнопка сохранить -->
+      <button id="save-btn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+        Сохранить плейлист
+      </button>
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
