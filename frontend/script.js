@@ -54,7 +54,7 @@ analyzeBtn.addEventListener('click', async () => {
     analyzeBtn.disabled = true;
     analyzeBtn.textContent = 'Анализ...';
 
-    const response = await fetch('http://127.0.0.1:8000/analyze', {
+    const response = await fetch('https://moodcrowd.onrender.com/analyze', {
       method: 'POST',
       body: formData
     });
