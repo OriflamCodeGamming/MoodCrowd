@@ -20,6 +20,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+def home():
+    return {"message": "APIшка MoodCrowd запущен."}
+
 @app.post("/analyze")
 async def analyze_tracks(files: List[UploadFile] = File(...)):
     results = []
