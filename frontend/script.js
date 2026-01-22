@@ -1,6 +1,5 @@
-// frontend/script.js
-
 let selectedFiles = [];
+let currentUser = null;
 
 // Элементы DOM
 const fileInput = document.getElementById('file-input');
@@ -11,6 +10,9 @@ const analyzeBtn = document.getElementById('analyze-btn');
 const resultsSection = document.getElementById('results-section');
 const tracksTable = document.getElementById('tracks-table');
 const saveBtn = document.getElementById('save-btn');
+const emailInput = document.getElementById('email-input');
+const loginBtn = document.getElementById('login-btn');
+const authSection = document.getElementById('auth-section');
 
 // Обработчики выбора файлов
 browseBtn.addEventListener('click', () => fileInput.click());
@@ -61,6 +63,9 @@ analyzeBtn.addEventListener('click', async () => {
 
     const tracks = await response.json();
 
+    // Сохраняем данные для последующего сохранения
+    window.currentTracks = tracks;
+
     // Очистка таблицы
     tracksTable.innerHTML = '';
 
@@ -83,6 +88,11 @@ analyzeBtn.addEventListener('click', async () => {
     document.getElementById('upload-section').classList.add('hidden');
     resultsSection.classList.remove('hidden');
 
+    // Если пользователь уже вошёл — разрешаем сохранять
+    if (currentUser) {
+      saveBtn.disabled = false;
+    }
+
   } catch (err) {
     alert('Ошибка: ' + err.message);
     console.error(err);
@@ -96,7 +106,6 @@ analyzeBtn.addEventListener('click', async () => {
 function renderChart(tracks) {
   const ctx = document.getElementById('bpm-chart').getContext('2d');
 
-  // Удаляем старый график, если есть
   if (window.bpmChart) window.bpmChart.destroy();
 
   const labels = tracks.map((_, i) => `Трек ${i + 1}`);
@@ -130,7 +139,44 @@ function renderChart(tracks) {
   });
 }
 
-// Кнопка "Сохранить" (временно)
+// Вход по email (демо)
+loginBtn.addEventListener('click', () => {
+  const email = emailInput.value.trim();
+  if (email && email.includes('@')) {
+    currentUser = email;
+    authSection.classList.add('hidden');
+    saveBtn.disabled = false;
+    alert('Вы вошли как ' + email);
+  } else {
+    alert('Введите корректный email');
+  }
+});
+
+// Сохранение плейлиста
 saveBtn.addEventListener('click', () => {
-  alert('Функция сохранения будет добавлена позже (после авторизации)');
+  if (!currentUser) {
+    alert('Сначала войдите!');
+    return;
+  }
+  if (!window.currentTracks || window.currentTracks.length === 0) {
+    alert('Нет данных для сохранения');
+    return;
+  }
+
+  const playlistName = prompt('Название плейлиста:', 'Моя вечеринка');
+  if (!playlistName) return;
+
+  const playlist = {
+    id: Date.now(),
+    name: playlistName,
+    user: currentUser,
+    createdAt: new Date().toISOString(),
+    tracks: window.currentTracks
+  };
+
+  const saved = JSON.parse(localStorage.getItem('playlists') || '[]');
+  saved.push(playlist);
+  localStorage.setItem('playlists', JSON.stringify(saved));
+
+  alert('Плейлист «' + playlistName + '» сохранён в браузере!');
 });

@@ -70,11 +70,17 @@
       </div>
 
       <!-- Кнопка сохранить -->
-      <button id="save-btn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+      <button id="save-btn" disabled class="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
         Сохранить плейлист
       </button>
     </div>
 
+    <!-- Форма входа -->
+    <div id="auth-section" class="mt-4 text-sm text-gray-600">
+      <p>Для сохранения войдите (в демо-режиме: любой email)</p>
+      <input type="email" id="email-input" placeholder="ваш@email.com" class="border p-1 rounded mr-2">
+      <button id="login-btn" class="text-blue-600 underline">Войти</button>
+    </div>
   </div>
 
   <script src="script.js"></script>
