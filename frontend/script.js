@@ -1,7 +1,7 @@
 // === ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ===
 async function apiCall(url, options) {
   options = options || {};
-  const backendUrl = "http://127.0.0.1:8000";
+  const backendUrl = "https://moodcrowd.onrender.com";
   const res = await fetch(backendUrl + url, {
     credentials: "include",
     method: options.method || "GET",
