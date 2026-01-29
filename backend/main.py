@@ -77,7 +77,14 @@ async def login(user: UserLogin, response: JSONResponse):
     
     # Устанавливаем cookie с email (упрощённая сессия)
     response = JSONResponse({"message": "Вход выполнен"})
-    response.set_cookie(key="session_email", value=user.email, httponly=False, max_age=86400)  # 24 часа
+    response.set_cookie(
+        key="session_email",
+        value=user.email,
+        httponly=False,
+        secure=True,          # ← для HTTPS
+        samesite="None",      # ← критично для кросс-доменных кук
+        max_age=86400
+    )
     return response
 
 @app.post("/analyze")
