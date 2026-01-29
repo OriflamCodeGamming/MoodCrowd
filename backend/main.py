@@ -17,13 +17,12 @@ from .database import init_db, get_db_connection, verify_password, get_password_
 
 app = FastAPI(title="MoodCrowd API")
 
-# Разрешаем только твой локальный frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://127.0.0.1:8080",
-        "http://192.168.0.1:8080",   # ← твой IP из лога
-        "http://172.26.16.1:8080"    # ← второй IP из лога
+        "http://127.0.0.1:8080",          # локальный http-server
+        "https://moodcrowd.vercel.app",   # твой frontend
+        "https://moodcrowd.onrender.com"  # backend (для safety)
     ],
     allow_methods=["*"],
     allow_headers=["*"],
