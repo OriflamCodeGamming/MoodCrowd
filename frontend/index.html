@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MoodCrowd</title>
-  <!-- Подключаем Tailwind CSS -->
+  <title>MoodCrowd — DJ Playlist Maker</title>
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     .file-drop {
       border: 2px dashed #cbd5e1;
@@ -20,14 +21,63 @@
       background: #f8fafc;
     }
   </style>
+  <style>
+    .notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 24px;
+      border-radius: 8px;
+      color: white;
+      font-weight: bold;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .notification.show {
+      opacity: 1;
+    }
+    .notification.success { background-color: #10b981; } /* зелёный */
+    .notification.error { background-color: #ef4444; }   /* красный */
+  </style>
 </head>
 <body class="bg-gray-50 min-h-screen p-6">
 
   <div class="max-w-4xl mx-auto">
-    <h1 class="text-3xl font-bold text-center mb-6 text-indigo-700">MoodCrowd</h1>
+    <h1 class="text-3xl font-bold text-center mb-4 text-indigo-700">MoodCrowd</h1>
+    <div class="text-center mb-4">
+      <button id="show-playlists-btn" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg shadow transition duration-200">
+  Мои плейлисты
+</button>
+    </div>
 
-    <!-- Область загрузки -->
-    <div id="upload-section" class="bg-white p-6 rounded-xl shadow mb-8">
+    <!-- Форма авторизации -->
+    <div id="auth-section" class="bg-white p-6 rounded-xl shadow mb-8">
+      <div id="login-form">
+        <h2 class="text-xl font-semibold mb-3">Вход</h2>
+        <input type="email" id="login-email" placeholder="Email" class="border p-2 w-full mb-2">
+        <input type="password" id="login-password" placeholder="Пароль" class="border p-2 w-full mb-2">
+        <button id="login-btn" class="bg-blue-600 text-white px-4 py-2 rounded w-full">Войти</button>
+        <p class="mt-2 text-sm text-center">
+          Нет аккаунта? <button id="show-register" class="text-indigo-600 underline">Зарегистрироваться</button>
+        </p>
+      </div>
+
+      <div id="register-form" class="hidden mt-4">
+        <h2 class="text-xl font-semibold mb-3">Регистрация</h2>
+        <input type="email" id="reg-email" placeholder="Email" class="border p-2 w-full mb-2">
+        <input type="password" id="reg-password" placeholder="Пароль" class="border p-2 w-full mb-2">
+        <button id="register-btn" class="bg-green-600 text-white px-4 py-2 rounded w-full">Зарегистрироваться</button>
+        <p class="mt-2 text-sm text-center">
+          Уже есть аккаунт? <button id="show-login" class="text-indigo-600 underline">Войти</button>
+        </p>
+      </div>
+    </div>
+
+    <!-- Загрузка файлов -->
+    <div id="upload-section" class="bg-white p-6 rounded-xl shadow mb-8 hidden">
       <h2 class="text-xl font-semibold mb-4">Загрузите до 10 MP3-файлов</h2>
       <div class="file-drop" id="drop-area">
         <p class="text-gray-600 mb-2">Перетащите файлы сюда или нажмите</p>
@@ -37,16 +87,15 @@
         </button>
       </div>
       <p id="file-count" class="mt-2 text-sm text-gray-500">Выбрано: 0 файлов</p>
-      <button id="analyze-btn" disabled class="mt-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50">
+      <button id="analyze-btn" disabled class="mt-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full">
         Анализировать
       </button>
     </div>
 
-    <!-- Результаты -->
+    <!-- Результаты анализа -->
     <div id="results-section" class="hidden">
       <h2 class="text-2xl font-bold mb-4">Анализ плейлиста</h2>
 
-      <!-- Таблица -->
       <div class="bg-white p-4 rounded-xl shadow mb-6 overflow-x-auto">
         <table class="min-w-full">
           <thead>
@@ -58,29 +107,43 @@
             </tr>
           </thead>
           <tbody id="tracks-table">
-            <!-- Сюда подставятся строки -->
           </tbody>
         </table>
       </div>
 
-      <!-- График -->
       <div class="bg-white p-4 rounded-xl shadow mb-6">
         <h3 class="font-medium mb-2">График BPM</h3>
         <canvas id="bpm-chart" height="100"></canvas>
       </div>
 
-      <!-- Кнопка сохранить -->
-      <button id="save-btn" disabled class="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-        Сохранить плейлист
-      </button>
+      <div class="flex gap-3">
+        <button id="save-btn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex-1">
+          Сохранить плейлист
+        </button>
+        <button id="back-to-upload" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 flex-1">
+          Назад
+        </button>
+      </div>
     </div>
 
-    <!-- Форма входа -->
-    <div id="auth-section" class="mt-4 text-sm text-gray-600">
-      <p>Для сохранения войдите (в демо-режиме: любой email)</p>
-      <input type="email" id="email-input" placeholder="ваш@email.com" class="border p-1 rounded mr-2">
-      <button id="login-btn" class="text-blue-600 underline">Войти</button>
+    <!-- Страница "Мои плейлисты" -->
+    <div id="playlists-section" class="hidden mt-8">
+      <h2 class="text-2xl font-bold mb-4">Мои плейлисты</h2>
+      <div id="playlists-list" class="space-y-4"></div>
+      <button id="back-to-main" class="mt-4 text-indigo-600 hover:underline">← Назад</button>
     </div>
+
+    <!-- Аудиоплеер -->
+    <div id="player-section" class="hidden mt-8 bg-white p-4 rounded-xl shadow">
+      <h2 class="text-xl font-bold mb-3">Плеер</h2>
+      <audio id="audio-player" controls class="w-full"></audio>
+      <div class="mt-2 flex gap-2 justify-center">
+        <button id="prev-btn" class="px-3 py-1 bg-gray-200 rounded">❮</button>
+        <button id="next-btn" class="px-3 py-1 bg-gray-200 rounded">❯</button>
+      </div>
+      <button id="back-to-playlists" class="mt-2 text-indigo-600 hover:underline">← К списку плейлистов</button>
+    </div>
+
   </div>
 
   <script src="script.js"></script>
