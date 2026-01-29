@@ -5,3 +5,4 @@ eyed3
 librosa
 numpy
 passlib[bcrypt]
+python-multipart
