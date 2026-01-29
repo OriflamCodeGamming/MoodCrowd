@@ -30,8 +30,6 @@ app.add_middleware(
     allow_credentials=True
 )
 
-# Инициализация БД при старте
-init_db()
 
 # Модели
 class UserRegister(BaseModel):
@@ -179,3 +177,6 @@ async def list_playlists(user_id: int = Depends(get_current_user)):
     
     conn.close()
     return JSONResponse(result)
+
+# Инициализация БД при старте
+init_db()
