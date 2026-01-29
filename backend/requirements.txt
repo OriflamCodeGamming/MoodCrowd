@@ -4,5 +4,7 @@ python-dotenv
 eyed3
 librosa
 numpy
-passlib[bcrypt]
 python-multipart
+# Стабильные версии для Python 3.13 и Render
+bcrypt==3.2.2
+passlib[bcrypt]==1.7.4
