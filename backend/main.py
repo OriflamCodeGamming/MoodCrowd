@@ -13,7 +13,7 @@ from pydantic import BaseModel
 import sqlite3
 from datetime import datetime
 
-from database import init_db, get_db_connection, verify_password, get_password_hash
+from .database import init_db, get_db_connection, verify_password, get_password_hash
 
 app = FastAPI(title="MoodCrowd API")
 
