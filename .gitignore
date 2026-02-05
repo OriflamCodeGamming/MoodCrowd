@@ -1,1 +1,17 @@
+# Python
+__pycache__/
+*.pyc
 .env
+.venv/
+moodcrowd.db
+
+# Node.js / http-server
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

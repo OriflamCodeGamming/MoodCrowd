@@ -13,16 +13,14 @@ from pydantic import BaseModel
 import sqlite3
 from datetime import datetime
 
-from .database import init_db, get_db_connection, verify_password, get_password_hash
+from database import init_db, get_db_connection, verify_password, get_password_hash
 
 app = FastAPI(title="MoodCrowd API")
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://127.0.0.1:8080",          # локальный http-server
-        "https://moodcrowd.vercel.app",   # твой frontend
-        "https://moodcrowd.onrender.com"  # backend (для safety)
+        "http://127.0.0.1:8080"          # локальный http-server
     ],
     allow_methods=["*"],
     allow_headers=["*"],
@@ -89,6 +87,7 @@ async def login(user: UserLogin, response: JSONResponse):
 
 @app.post("/analyze")
 async def analyze_tracks(files: List[UploadFile] = File(...)):
+    print("анализ начат")
     results = []
     for file in files:
         if not file.filename.endswith(".mp3"):
@@ -128,6 +127,7 @@ async def analyze_tracks(files: List[UploadFile] = File(...)):
         finally:
             if os.path.exists(tmp_path):
                 os.unlink(tmp_path)
+    print("анализ закончен")
     return JSONResponse(results)
 
 @app.post("/playlists/save")

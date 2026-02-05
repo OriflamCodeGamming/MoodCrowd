@@ -1,8 +1,10 @@
+// === КОНСТАНТЫ ===
+const BACKEND_URL = "http://127.0.0.1:8000"; // Порт вашего FastAPI (из лога uvicorn)
+
 // === ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ===
 async function apiCall(url, options) {
   options = options || {};
-  const backendUrl = "https://moodcrowd.onrender.com";
-  const res = await fetch(backendUrl + url, {
+  const res = await fetch(BACKEND_URL + url, {
     credentials: "include",
     method: options.method || "GET",
     headers: options.headers || {},
@@ -17,17 +19,14 @@ async function apiCall(url, options) {
 
 // === УВЕДОМЛЕНИЯ ===
 function showNotification(message, type = "success") {
-  // Удаляем старое уведомление
   const old = document.querySelector(".notification");
   if (old) old.remove();
 
-  // Создаём новое
   const notification = document.createElement("div");
   notification.className = `notification ${type} show`;
   notification.textContent = message;
   document.body.appendChild(notification);
 
-  // Скрываем через 3 секунды
   setTimeout(() => {
     notification.classList.remove("show");
     setTimeout(() => notification.remove(), 300);
@@ -62,7 +61,7 @@ document.addEventListener("DOMContentLoaded", function () {
       uploadSection.classList.remove("hidden");
       showPlaylistsButton();
     } catch (e) {
-      // Не авторизован
+      // Не авторизован — ничего не делаем
     }
   }
 
@@ -74,14 +73,14 @@ document.addEventListener("DOMContentLoaded", function () {
         await apiCall("/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: email, password: password })
+          body: JSON.stringify({ email, password })
         });
         showNotification("Вход выполнен!");
         authSection.classList.add("hidden");
         uploadSection.classList.remove("hidden");
         showPlaylistsButton();
       } catch (err) {
-        showNotification("Ошибка входа: " + err.massage, "error");
+        showNotification("Ошибка входа: " + err.message, "error"); // ✅ исправлено
       }
     });
   }
@@ -94,13 +93,13 @@ document.addEventListener("DOMContentLoaded", function () {
         await apiCall("/auth/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: email, password: password })
+          body: JSON.stringify({ email, password })
         });
         showNotification("Регистрация успешна! Теперь войдите.");
         registerForm.classList.add("hidden");
         loginForm.classList.remove("hidden");
       } catch (err) {
-        showNotification("Ошибка регистрации: " + err.massage, "error");
+        showNotification("Ошибка регистрации: " + err.message, "error"); // ✅ исправлено
       }
     });
   }
@@ -184,7 +183,7 @@ if (document.getElementById("analyze-btn")) {
       const formData = new FormData();
       currentFilesForAnalysis.forEach(file => formData.append("files", file));
 
-      const response = await fetch("http://127.0.0.1:8000/analyze", {
+      const response = await fetch(BACKEND_URL + "/analyze", { // ✅ единый URL
         method: "POST",
         body: formData,
         credentials: "include"
@@ -221,7 +220,7 @@ if (document.getElementById("analyze-btn")) {
 
     } catch (err) {
       console.error(err);
-      showNotification("Ошибка анализа: " + err.massage, "error");
+      showNotification("Ошибка анализа: " + err.message, "error"); // ✅ исправлено
     } finally {
       const statusEl = document.getElementById("analysis-status");
       if (statusEl) statusEl.remove();
@@ -237,7 +236,6 @@ function renderChart(tracks) {
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
 
-  // Уничтожаем предыдущий график, если есть
   if (window.bpmChart) {
     window.bpmChart.destroy();
   }
@@ -276,6 +274,7 @@ function renderChart(tracks) {
     }
   });
 }
+
 // === СОХРАНЕНИЕ ПЛЕЙЛИСТА ===
 if (document.getElementById("save-btn")) {
   document.getElementById("save-btn").addEventListener("click", async function () {
@@ -285,11 +284,11 @@ if (document.getElementById("save-btn")) {
       await apiCall("/playlists/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name, tracks: window.currentTracks })
+        body: JSON.stringify({ name, tracks: window.currentTracks })
       });
       showNotification("Плейлист сохранён!");
     } catch (err) {
-      showNotification("Ошибка: " + err.massage, "error");
+      showNotification("Ошибка: " + err.message, "error"); // ✅ исправлено
     }
   });
 }
@@ -334,14 +333,15 @@ async function loadPlaylistsPage() {
     hideAllSections();
     document.getElementById("playlists-section").classList.remove("hidden");
   } catch (err) {
-    showNotification("Ошибка загрузки плейлистов: " + err.massage, "error");
+    showNotification("Ошибка загрузки плейлистов: " + err.message, "error"); // ✅ исправлено
   }
 }
 
 window.viewPlaylist = async function(playlistId) {
   const pl = currentPlaylists.find(p => p.id == playlistId);
   if (!pl) return;
-  showNotification(`Плейлист: ${pl.name}\nТреки:\n${pl.tracks.map(t => t.title || t.filename).join('\n')}`);
+  const trackNames = pl.tracks.map(t => t.title || t.filename).join('\n');
+  alert(`Плейлист: ${pl.name}\n\nТреки:\n${trackNames}`); // Лучше alert для многострочного текста
 };
 
 // === ВОСПРОИЗВЕДЕНИЕ СОХРАНЁННОГО ПЛЕЙЛИСТА ===
@@ -352,7 +352,6 @@ window.playPlaylistFromList = async function(playlistId) {
     return;
   }
 
-  // Ищем совпадения с текущими файлами по имени
   const matchedFiles = [];
   pl.tracks.forEach(track => {
     const file = window.currentFiles?.find(f => f.name === track.filename);
@@ -366,14 +365,10 @@ window.playPlaylistFromList = async function(playlistId) {
     return;
   }
 
-  // Сохраняем для плеера
   window.currentFiles = matchedFiles;
   window.currentTracks = pl.tracks;
-
-  // Начинаем воспроизведение
   playTrack(0);
 
-  // Показываем плеер
   hideAllSections();
   document.getElementById("player-section").classList.remove("hidden");
 };
@@ -398,20 +393,19 @@ function playTrack(index) {
       showNotification("Браузер не позволяет воспроизвести аудио. Попробуйте нажать кнопку ещё раз.");
     });
     currentTrackIndex = index;
-    // Обновляем заголовок плеера
     const trackName = (window.currentTracks?.[index]?.title || file.name) || "Трек";
     document.querySelector("#player-section h2").textContent = `Плеер: ${trackName}`;
   }
 }
 
 // === КНОПКИ ПЛЕЕРА ===
-if (document.getElementById("audio-player")) {
+document.addEventListener("DOMContentLoaded", () => {
   const player = document.getElementById("audio-player");
   const nextBtn = document.getElementById("next-btn");
   const prevBtn = document.getElementById("prev-btn");
 
   if (nextBtn) {
-    nextBtn.addEventListener("click", function () {
+    nextBtn.addEventListener("click", () => {
       if (currentTrackIndex < (window.currentFiles?.length || 0) - 1) {
         playTrack(currentTrackIndex + 1);
       }
@@ -419,7 +413,7 @@ if (document.getElementById("audio-player")) {
   }
 
   if (prevBtn) {
-    prevBtn.addEventListener("click", function () {
+    prevBtn.addEventListener("click", () => {
       if (currentTrackIndex > 0) {
         playTrack(currentTrackIndex - 1);
       }
@@ -427,13 +421,13 @@ if (document.getElementById("audio-player")) {
   }
 
   if (player) {
-    player.addEventListener("ended", function () {
+    player.addEventListener("ended", () => {
       if (currentTrackIndex < (window.currentFiles?.length || 0) - 1) {
         playTrack(currentTrackIndex + 1);
       }
     });
   }
-}
+});
 
 // === КНОПКА "К СПИСКУ" ===
 document.addEventListener("DOMContentLoaded", () => {
